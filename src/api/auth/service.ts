@@ -8,6 +8,7 @@ import { userRepository } from "../user/user.repository";
 import { ENV } from "../../utils/secrets";
 import { success } from "../../response/success";
 import { Response } from "express";
+import type { StringValue } from "ms";
 
 export const authService = {
     login: async (req: LoginRequest, res: Response) => {
@@ -37,7 +38,9 @@ export const authService = {
             role: user.role,
         };
 
-        const token = jwt.sign(jwtPayload, ENV.JWT_SECRET);
+        const token = jwt.sign(jwtPayload, ENV.JWT_SECRET, {
+            expiresIn: ENV.JWT_EXPIRE as StringValue,
+        });
 
         res.status(StatusCodes.OK).json(
             success("Login Successed !", { user: jwtPayload, token })
