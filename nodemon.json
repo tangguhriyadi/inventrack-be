@@ -1,0 +1,6 @@
+{
+    "watch": ["src"],
+    "ext": ".js,.ts",
+    "ignore": ["src/**/*.spec.ts"],
+    "exec": "npx ts-node --files src/index.ts | pino-pretty"
+  }

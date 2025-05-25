@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "noUnusedLocals": true,
+        "baseUrl": ".",
+        "outDir": "dist",
+        "paths": {
+            "@/*": ["src/*"]
+        }
+    },
+    "typeRoots": ["./src/types", "./node_modules/@types"],
+    "include": ["src/**/*.ts", "src/paths.ts", "api/*.ts", "./.*.js"],
+    "exclude": ["node_modules/*", "dist/*"]
+  }
