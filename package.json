@@ -28,7 +28,8 @@
         "minio": "^8.0.1",
         "module-alias": "^2.2.3",
         "nodemailer": "^6.9.14",
-        "pino-http": "^10.1.0"
+        "pino-http": "^10.1.0",
+        "yup": "^1.6.1"
     },
     "devDependencies": {
         "@types/bcrypt": "^5.0.2",

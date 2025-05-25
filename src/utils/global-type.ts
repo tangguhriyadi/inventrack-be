@@ -1,4 +1,4 @@
-// import { Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 
 export type Pagination = {
     page: number;
@@ -11,6 +11,6 @@ export type JWTPayload = {
     id: string;
     name: string;
     email: string;
-    // role: Role;
+    role: Role;
    
 };
