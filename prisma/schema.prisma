@@ -65,6 +65,8 @@ model User {
   inventoryCategoryUpdated    InventoryCategory[] @relation(name: "InventoryCategoryUpdatedBy")
   inventoryCategoryDeleted    InventoryCategory[] @relation(name: "InventoryCategoryDeletedBy")
 
+  // booking
+  booking   Booking[] 
 
   @@map("user")
   @@unique([id])
@@ -90,6 +92,8 @@ model Inventory {
   condition           InventoryCondition @default(NEW)
   image_url           String
   category_id         String
+  quantity            Int @default(0)
+
 
   is_deleted          Boolean @db.Boolean() @default(false)
   created_by          String
@@ -108,25 +112,28 @@ model Inventory {
   deletedBy           User?  @relation(fields: [deleted_by], references: [id], name: "InventoryDeletedBy")
 
   // inventory item
-  inventoryItems      InventoryItem[]
+  // inventoryItems      InventoryItem[]
+
+  // booking
+  bookingInventory    BookingInventory[]
 
   @@map("inventory")
   @@unique([id])
 }
 
-model InventoryItem {
-  id                  String    @id @default(uuid())
-  inventory_id        String    
+// model InventoryItem {
+//   id                  String    @id @default(uuid())
+//   inventory_id        String    
 
-  created_at          DateTime  @default(now())
-  updated_at          DateTime  @updatedAt
+//   created_at          DateTime  @default(now())
+//   updated_at          DateTime  @updatedAt
 
-  //inventory
-  inventory           Inventory @relation(fields: [inventory_id], references: [id])
+//   //inventory
+//   inventory           Inventory @relation(fields: [inventory_id], references: [id])
 
-  @@map("inventory_item")
-  @@unique([id])
-}
+//   @@map("inventory_item")
+//   @@unique([id])
+// }
 
 model InventoryCategory {
   id                  String    @id @default(uuid())
@@ -151,3 +158,46 @@ model InventoryCategory {
   @@map("inventory_category")
   @@unique([id])
 }
+
+model Booking {
+  id                  String    @id @default(uuid())
+  user_id             String
+  booking_at          DateTime  @default(now())
+  return_at           DateTime?
+  approved_at         DateTime?
+  plan_return_at      DateTime
+
+  created_at          DateTime  @default(now()) 
+
+  // user
+  user                User @relation(fields: [user_id], references: [id])
+
+  bookingInventory    BookingInventory[]
+
+
+  @@map("booking")
+  @@unique([id])
+}
+
+model BookingInventory {
+  booking_id          String
+  inventory_id        String
+  quantity            Int @default(0)
+
+  booking             Booking @relation(fields: [booking_id], references: [id])
+  inventory           Inventory @relation(fields: [inventory_id], references: [id])
+
+  @@map("booking_inventory")
+  @@unique([booking_id, inventory_id])
+}
+
+// model BookingItem {
+//   id                       String    @id @default(uuid())
+//   user_id                  String
+//   inventory_id             String
+//   quantity                 Int
+//   created_at               DateTime
+
+//   @@map("booking_item")
+//   @@unique([id])
+// }

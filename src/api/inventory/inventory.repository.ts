@@ -26,13 +26,13 @@ export const inventoryRepository = {
                 name: true,
                 condition: true,
                 image_url: true,
+                quantity: true,
                 createdBy: {
                     select: {
                         name: true,
                     },
                 },
                 created_at: true,
-                inventoryItems: true,
                 is_available: true,
                 inventoryCategory: {
                     select: {
@@ -61,8 +61,8 @@ export const inventoryRepository = {
                 name: true,
                 condition: true,
                 image_url: true,
-                inventoryItems: true,
                 is_available: true,
+                quantity: true,
                 inventoryCategory: {
                     select: {
                         name: true,
@@ -80,13 +80,14 @@ export const inventoryRepository = {
                 image_url: body.image_url,
                 is_available: body.is_available,
                 category_id: body.category_id,
-                inventoryItems: {
-                    createMany: {
-                        data: Array.from({ length: body.quantity }, () => ({
-                            created_at: new Date(),
-                        })),
-                    },
-                },
+                quantity: body.quantity
+                // inventoryItems: {
+                //     createMany: {
+                //         data: Array.from({ length: body.quantity }, () => ({
+                //             created_at: new Date(),
+                //         })),
+                //     },
+                // },
             },
             select: {
                 id: true,
@@ -107,6 +108,7 @@ export const inventoryRepository = {
                 is_available: body.is_available,
                 updated_by: user_id,
                 category_id: body.category_id,
+                quantity: body.quantity
             },
             select: {
                 id: true,
