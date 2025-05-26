@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { HttpException } from "../../response/exception";
-import { LoginRequest, loginSchema } from "./model";
+import { LoginRequest, loginSchema } from "./auth.model";
 import { compareSync } from "bcrypt";
 import * as jwt from "jsonwebtoken";
 import { JWTPayload } from "../../utils/global-type";
@@ -9,6 +9,8 @@ import { ENV } from "../../utils/secrets";
 import { success } from "../../response/success";
 import { Response } from "express";
 import type { StringValue } from "ms";
+import { insertLog } from "../../utils/insert-log";
+import { ActionLog } from "@prisma/client";
 
 export const authService = {
     login: async (req: LoginRequest, res: Response) => {
@@ -40,6 +42,13 @@ export const authService = {
 
         const token = jwt.sign(jwtPayload, ENV.JWT_SECRET, {
             expiresIn: ENV.JWT_EXPIRE as StringValue,
+        });
+
+        // ASYNC PROCESS
+        insertLog({
+            action: ActionLog.LOGIN,
+            user_id: user.id,
+            user_name: user.name,
         });
 
         res.status(StatusCodes.OK).json(

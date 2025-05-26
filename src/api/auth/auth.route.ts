@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authService } from "./service";
+import { authService } from "./auth.service";
 import { errorHandler } from "../../utils/error-handler";
 
 const authRoutes: Router = Router();
