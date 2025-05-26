@@ -45,7 +45,7 @@ export const authService = {
         });
 
         // ASYNC PROCESS
-        insertLog({
+        await insertLog({
             action: ActionLog.LOGIN,
             user_id: user.id,
             user_name: user.name,
@@ -54,5 +54,14 @@ export const authService = {
         res.status(StatusCodes.OK).json(
             success("Login Successed !", { user: jwtPayload, token })
         );
+    },
+    logout: async (req: LoginRequest, res: Response) => {
+        await await insertLog({
+            action: ActionLog.LOGOUT,
+            user_id: req.user.id,
+            user_name: req.user.name,
+        });
+
+        res.status(StatusCodes.OK).json(success("Logout Successed !", null));
     },
 };

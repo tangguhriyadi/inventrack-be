@@ -26,5 +26,10 @@ bookingRoutes.post(
     authMiddlewaare([Role.ADMIN]),
     errorHandler(bookingService.return)
 );
+bookingRoutes.post(
+    "/:id/reject",
+    authMiddlewaare([Role.ADMIN]),
+    errorHandler(bookingService.reject)
+);
 
 export default bookingRoutes;

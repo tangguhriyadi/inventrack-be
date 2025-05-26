@@ -80,7 +80,8 @@ export const inventoryRepository = {
                 image_url: body.image_url,
                 is_available: body.is_available,
                 category_id: body.category_id,
-                quantity: body.quantity
+                quantity: body.quantity,
+
                 // inventoryItems: {
                 //     createMany: {
                 //         data: Array.from({ length: body.quantity }, () => ({
@@ -108,7 +109,7 @@ export const inventoryRepository = {
                 is_available: body.is_available,
                 updated_by: user_id,
                 category_id: body.category_id,
-                quantity: body.quantity
+                quantity: body.quantity,
             },
             select: {
                 id: true,
