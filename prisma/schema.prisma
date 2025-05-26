@@ -34,6 +34,12 @@ enum ActionLog {
   LOGOUT
 }
 
+enum InventoryCondition {
+  NEW
+  GOOD
+  WORN
+}
+
 model User {
   id                  String    @id @default(uuid())
   name                String    
@@ -48,6 +54,16 @@ model User {
   deleted_at          DateTime?
   created_at          DateTime  @default(now())
   updated_at          DateTime  @updatedAt
+
+   // inventory
+  inventoryCreated    Inventory[] @relation(name: "InventoryCreatedBy")
+  inventoryUpdated    Inventory[] @relation(name: "InventoryUpdatedBy")
+  inventoryDeleted    Inventory[] @relation(name: "InventoryDeletedBy")
+
+   // inventory cateogry
+  inventoryCategoryCreated    InventoryCategory[] @relation(name: "InventoryCategoryCreatedBy")
+  inventoryCategoryUpdated    InventoryCategory[] @relation(name: "InventoryCategoryUpdatedBy")
+  inventoryCategoryDeleted    InventoryCategory[] @relation(name: "InventoryCategoryDeletedBy")
 
 
   @@map("user")
@@ -64,5 +80,49 @@ model UserLogs {
   inventory_id        String?
 
   @@map("user_logs")
+  @@unique([id])
+}
+
+model Inventory {
+  id                  String    @id @default(uuid())
+  name                String
+  is_available        Boolean   @db.Boolean() @default(true)
+  condition           InventoryCondition @default(NEW)
+
+  is_deleted          Boolean @db.Boolean() @default(false)
+  created_by          String
+  updated_by          String?
+  deleted_by          String?
+  deleted_at          DateTime?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  // users
+  createdBy           User   @relation(fields: [created_by], references: [id], name: "InventoryCreatedBy")
+  updatedBy           User?  @relation(fields: [updated_by], references: [id], name: "InventoryUpdatedBy")
+  deletedBy           User?  @relation(fields: [deleted_by], references: [id], name: "InventoryDeletedBy")
+
+  @@map("inventory")
+  @@unique([id])
+}
+
+model InventoryCategory {
+  id                  String    @id @default(uuid())
+  name                String
+
+  is_deleted          Boolean @db.Boolean() @default(false)
+  created_by          String
+  updated_by          String?
+  deleted_by          String?
+  deleted_at          DateTime?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+   // users
+  createdBy           User   @relation(fields: [created_by], references: [id], name: "InventoryCategoryCreatedBy")
+  updatedBy           User?  @relation(fields: [updated_by], references: [id], name: "InventoryCategoryUpdatedBy")
+  deletedBy           User?  @relation(fields: [deleted_by], references: [id], name: "InventoryCategoryDeletedBy")
+
+  @@map("inventory_category")
   @@unique([id])
 }
