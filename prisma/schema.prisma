@@ -88,6 +88,8 @@ model Inventory {
   name                String
   is_available        Boolean   @db.Boolean() @default(true)
   condition           InventoryCondition @default(NEW)
+  image_url           String
+  category_id         String
 
   is_deleted          Boolean @db.Boolean() @default(false)
   created_by          String
@@ -97,12 +99,32 @@ model Inventory {
   created_at          DateTime  @default(now())
   updated_at          DateTime  @updatedAt
 
+  // category
+  inventoryCategory   InventoryCategory @relation(fields: [category_id], references: [id])
+
   // users
   createdBy           User   @relation(fields: [created_by], references: [id], name: "InventoryCreatedBy")
   updatedBy           User?  @relation(fields: [updated_by], references: [id], name: "InventoryUpdatedBy")
   deletedBy           User?  @relation(fields: [deleted_by], references: [id], name: "InventoryDeletedBy")
 
+  // inventory item
+  inventoryItems      InventoryItem[]
+
   @@map("inventory")
+  @@unique([id])
+}
+
+model InventoryItem {
+  id                  String    @id @default(uuid())
+  inventory_id        String    
+
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  //inventory
+  inventory           Inventory @relation(fields: [inventory_id], references: [id])
+
+  @@map("inventory_item")
   @@unique([id])
 }
 
@@ -117,6 +139,9 @@ model InventoryCategory {
   deleted_at          DateTime?
   created_at          DateTime  @default(now())
   updated_at          DateTime  @updatedAt
+
+  // inventory
+  inventories         Inventory[]
 
    // users
   createdBy           User   @relation(fields: [created_by], references: [id], name: "InventoryCategoryCreatedBy")

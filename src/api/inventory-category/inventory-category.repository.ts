@@ -8,6 +8,8 @@ export const inventoryCategoryRepository = {
             select: {
                 id: true,
                 name: true,
+                created_at: true,
+                updated_at: true,
             },
             where: {
                 is_deleted: false,

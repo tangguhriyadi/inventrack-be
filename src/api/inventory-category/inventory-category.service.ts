@@ -40,31 +40,31 @@ export const inventoryCategoryService = {
             abortEarly: false,
         });
 
-        const travelAgent = await inventoryCategoryRepository.findById(
+        const inventoryCategory = await inventoryCategoryRepository.findById(
             req.params.id
         );
 
-        if (!travelAgent) {
+        if (!inventoryCategory) {
             throw new HttpException(
                 "Category not found",
                 StatusCodes.NOT_FOUND
             );
         }
 
-        res.status(StatusCodes.OK).json(success("Success", travelAgent));
+        res.status(StatusCodes.OK).json(success("Success", inventoryCategory));
     },
     create: async (req: InventoryCategoryRequest, res: Response) => {
         req.body = inventoryCategoryBody.validateSync(req.body, {
             abortEarly: false,
         });
 
-        const createTravelAgent = await inventoryCategoryRepository.create(
+        const createCategory = await inventoryCategoryRepository.create(
             req.body,
             req.user.id
         );
 
         res.status(StatusCodes.CREATED).json(
-            success("Success", createTravelAgent)
+            success("Success", createCategory)
         );
     },
     update: async (req: InventoryCategoryRequest, res: Response) => {
@@ -75,11 +75,11 @@ export const inventoryCategoryService = {
             abortEarly: false,
         });
 
-        const travelAgent = await inventoryCategoryRepository.findById(
+        const category = await inventoryCategoryRepository.findById(
             req.params.id
         );
 
-        if (!travelAgent) {
+        if (!category) {
             throw new HttpException(
                 "Category not found",
                 StatusCodes.NOT_FOUND
@@ -102,11 +102,11 @@ export const inventoryCategoryService = {
             abortEarly: false,
         });
 
-        const travelAgent = await inventoryCategoryRepository.findById(
+        const category = await inventoryCategoryRepository.findById(
             req.params.id
         );
 
-        if (!travelAgent) {
+        if (!category) {
             throw new HttpException(
                 "Category not found",
                 StatusCodes.NOT_FOUND
