@@ -16,6 +16,10 @@ export const inventoryRepository = {
             whereCondition.condition = query.condition;
         }
 
+        if (query.category_id) {
+            whereCondition.category_id = query.category_id;
+        }
+
         return await prisma.inventory.findMany({
             select: {
                 id: true,
