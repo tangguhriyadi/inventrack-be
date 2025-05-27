@@ -56,7 +56,7 @@ export const authService = {
         );
     },
     logout: async (req: LoginRequest, res: Response) => {
-        await await insertLog({
+        await insertLog({
             action: ActionLog.LOGOUT,
             user_id: req.user.id,
             user_name: req.user.name,
