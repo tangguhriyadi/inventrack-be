@@ -42,6 +42,13 @@ enum InventoryCondition {
   WORN
 }
 
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RETURNED
+}
+
 model User {
   id                  String    @id @default(uuid())
   name                String    
@@ -185,7 +192,7 @@ model Booking {
   approved_by         String?
   rejected_by         String?
 
-
+  status              BookingStatus @default(PENDING)
 
   // user
   user                 User @relation(fields: [user_id], references: [id], name: "BookingUser")

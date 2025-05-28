@@ -1,6 +1,6 @@
 import { prisma } from "../../plugins/prisma";
 import { transformSortOrder } from "../../utils/global-type";
-import { InventoryQuery } from "../inventory/inventory.model";
+import { BoookingQuery } from "./booking.model";
 
 export const bookingRepository = {
     create: async (
@@ -18,7 +18,7 @@ export const bookingRepository = {
             },
         });
     },
-    findMany: async (user_id: string, query: InventoryQuery) => {
+    findMany: async (user_id: string, query: BoookingQuery) => {
         const whereCondition = {} as any;
 
         if (query.category_id) {
@@ -28,6 +28,12 @@ export const bookingRepository = {
             whereCondition.user_id = query.user_id;
         }
 
+        const whereBookingCondition = {} as any;
+
+        if (query.status) {
+            whereBookingCondition.status = query.status;
+        }
+
         return await prisma.booking.findMany({
             where: {
                 inventory: {
@@ -37,6 +43,7 @@ export const bookingRepository = {
                     },
                     ...whereCondition,
                 },
+                ...whereBookingCondition,
             },
             select: {
                 id: true,
@@ -71,6 +78,7 @@ export const bookingRepository = {
                 is_rejected: true,
                 is_done: true,
                 is_returned: true,
+                status: true,
             },
             orderBy: [
                 {
@@ -81,11 +89,16 @@ export const bookingRepository = {
             skip: (query.page - 1) * query.limit,
         });
     },
-    findManySelf: async (user_id: string, query: InventoryQuery) => {
+    findManySelf: async (user_id: string, query: BoookingQuery) => {
         const whereCondition = {} as any;
 
         if (query.category_id) {
             whereCondition.category_id = query.category_id;
+        }
+        const whereBookingCondition = {} as any;
+
+        if (query.status) {
+            whereBookingCondition.status = query.status;
         }
         return await prisma.booking.findMany({
             where: {
@@ -97,6 +110,7 @@ export const bookingRepository = {
                     ...whereCondition,
                 },
                 user_id,
+                ...whereBookingCondition,
             },
             select: {
                 id: true,
@@ -131,6 +145,20 @@ export const bookingRepository = {
                 is_rejected: true,
                 is_done: true,
                 is_returned: true,
+                created_at: true,
+                approvedby: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+                rejectedby: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+                status: true,
             },
             orderBy: [
                 {
@@ -141,11 +169,17 @@ export const bookingRepository = {
             skip: (query.page - 1) * query.limit,
         });
     },
-    count: async (query: InventoryQuery, user_id: string) => {
+    count: async (query: BoookingQuery, user_id: string) => {
         const whereCondition = {} as any;
 
         if (query.category_id) {
             whereCondition.category_id = query.category_id;
+        }
+
+        const whereBookingCondition = {} as any;
+
+        if (query.status) {
+            whereBookingCondition.status = query.status;
         }
         return await prisma.booking.count({
             where: {
@@ -156,14 +190,20 @@ export const bookingRepository = {
                     },
                     ...whereCondition,
                 },
+                ...whereBookingCondition,
             },
         });
     },
-    countSelf: async (query: InventoryQuery, user_id: string) => {
+    countSelf: async (query: BoookingQuery, user_id: string) => {
         const whereCondition = {} as any;
 
         if (query.category_id) {
             whereCondition.category_id = query.category_id;
+        }
+        const whereBookingCondition = {} as any;
+
+        if (query.status) {
+            whereBookingCondition.status = query.status;
         }
         return await prisma.booking.count({
             where: {
@@ -175,6 +215,7 @@ export const bookingRepository = {
                     ...whereCondition,
                 },
                 user_id,
+                ...whereBookingCondition,
             },
         });
     },

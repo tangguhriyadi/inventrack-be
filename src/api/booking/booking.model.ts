@@ -1,9 +1,12 @@
 import { Request } from "express";
 import * as yup from "yup";
 import { queryParams } from "../../utils/global-type";
+import { BookingStatus } from "@prisma/client";
 
 export const bookingQuery = queryParams.shape({
     category_id: yup.string().optional(),
+    user_id: yup.string().optional(),
+    status: yup.string().oneOf(Object.values(BookingStatus)).optional(),
 });
 
 export const bookingParams = yup.object({
