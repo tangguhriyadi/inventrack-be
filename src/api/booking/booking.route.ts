@@ -23,7 +23,7 @@ bookingRoutes.post(
 );
 bookingRoutes.post(
     "/:id/return",
-    authMiddlewaare([Role.ADMIN]),
+    authMiddlewaare([Role.STAFF, Role.ADMIN]),
     errorHandler(bookingService.return)
 );
 bookingRoutes.post(

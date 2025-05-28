@@ -14,7 +14,12 @@ import { StatusCodes } from "http-status-codes";
 import { success } from "../../response/success";
 import { bookingRepository } from "./booking.repository";
 import { Pagination } from "../../utils/global-type";
-import { ActionLog, BookingStatus, Role } from "@prisma/client";
+import {
+    ActionLog,
+    BookingStatus,
+    InventoryCondition,
+    Role,
+} from "@prisma/client";
 import { insertLog } from "../../utils/insert-log";
 
 export const bookingService = {
@@ -28,6 +33,10 @@ export const bookingService = {
 
         if (!inventory) {
             throw new HttpException("Inventory not found", 404);
+        }
+
+        if (inventory.condition === InventoryCondition.WORN) {
+            throw new HttpException("Inventory is booked by someone", 404);
         }
 
         if (!inventory.is_available) {
@@ -64,6 +73,15 @@ export const bookingService = {
             req.body.plan_return_at,
             req.body.inventory_id
         );
+
+        await prisma.inventory.update({
+            where: {
+                id: req.body.inventory_id,
+            },
+            data: {
+                condition: InventoryCondition.WORN,
+            },
+        });
 
         await insertLog({
             action: ActionLog.BOOK,
@@ -154,6 +172,15 @@ export const bookingService = {
             },
         });
 
+        await prisma.inventory.update({
+            where: {
+                id: booking.inventory.id,
+            },
+            data: {
+                condition: InventoryCondition.WORN,
+            },
+        });
+
         await insertLog({
             action: ActionLog.APPROVE,
             user_id: req.user.id,
@@ -204,6 +231,15 @@ export const bookingService = {
                 returned_at: new Date(),
                 is_done: true,
                 status: BookingStatus.RETURNED,
+            },
+        });
+
+        await prisma.inventory.update({
+            where: {
+                id: booking.inventory.id,
+            },
+            data: {
+                condition: InventoryCondition.GOOD,
             },
         });
 
@@ -265,6 +301,15 @@ export const bookingService = {
                 reject_reason: req.body.reason,
                 rejected_by: req.user.id,
                 status: BookingStatus.RETURNED,
+            },
+        });
+
+        await prisma.inventory.update({
+            where: {
+                id: booking.inventory_id,
+            },
+            data: {
+                condition: InventoryCondition.GOOD,
             },
         });
 
