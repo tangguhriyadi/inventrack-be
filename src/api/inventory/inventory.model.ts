@@ -17,7 +17,6 @@ export const inventoryBody = yup.object({
     quantity: yup.number().required().min(1),
     category_id: yup.string().required(),
     is_available: yup.boolean().required().default(true),
-    condition: yup.string().oneOf(Object.values(InventoryCondition)),
     image_url: yup.string().required(),
 });
 

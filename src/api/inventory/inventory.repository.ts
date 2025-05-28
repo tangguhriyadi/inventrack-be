@@ -1,3 +1,4 @@
+import { InventoryCondition } from "@prisma/client";
 import { prisma } from "../../plugins/prisma";
 import { transformSortOrder } from "../../utils/global-type";
 import { InventoryBody, InventoryQuery } from "./inventory.model";
@@ -26,10 +27,12 @@ export const inventoryRepository = {
                 name: true,
                 condition: true,
                 image_url: true,
+                category_id: true,
                 quantity: true,
                 createdBy: {
                     select: {
                         name: true,
+                        id: true,
                     },
                 },
                 created_at: true,
@@ -75,7 +78,7 @@ export const inventoryRepository = {
         return await prisma.inventory.create({
             data: {
                 name: body.name,
-                condition: body.condition,
+                condition: InventoryCondition.NEW,
                 created_by: userId,
                 image_url: body.image_url,
                 is_available: body.is_available,
@@ -104,7 +107,7 @@ export const inventoryRepository = {
             },
             data: {
                 name: body.name,
-                condition: body.condition,
+                // condition: body.condition,
                 image_url: body.image_url,
                 is_available: body.is_available,
                 updated_by: user_id,
