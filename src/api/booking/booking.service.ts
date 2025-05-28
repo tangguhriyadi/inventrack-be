@@ -14,7 +14,7 @@ import { StatusCodes } from "http-status-codes";
 import { success } from "../../response/success";
 import { bookingRepository } from "./booking.repository";
 import { Pagination } from "../../utils/global-type";
-import { ActionLog, Role } from "@prisma/client";
+import { ActionLog, BookingStatus, Role } from "@prisma/client";
 import { insertLog } from "../../utils/insert-log";
 
 export const bookingService = {
@@ -150,6 +150,7 @@ export const bookingService = {
                 is_approved: true,
                 approved_by: req.user.id,
                 approved_at: new Date(),
+                status: BookingStatus.APPROVED,
             },
         });
 
@@ -202,6 +203,7 @@ export const bookingService = {
                 is_returned: true,
                 returned_at: new Date(),
                 is_done: true,
+                status: BookingStatus.RETURNED,
             },
         });
 
@@ -262,6 +264,7 @@ export const bookingService = {
                 is_done: true,
                 reject_reason: req.body.reason,
                 rejected_by: req.user.id,
+                status: BookingStatus.RETURNED,
             },
         });
 
