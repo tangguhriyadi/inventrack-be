@@ -263,7 +263,7 @@ export const bookingService = {
         const booking = await prisma.booking.findFirst({
             where: {
                 id: req.params.id,
-                user_id: req.user.id,
+                // user_id: req.user.id,
             },
             include: {
                 inventory: true,
@@ -300,7 +300,7 @@ export const bookingService = {
                 is_done: true,
                 reject_reason: req.body.reason,
                 rejected_by: req.user.id,
-                status: BookingStatus.RETURNED,
+                status: BookingStatus.REJECTED,
             },
         });
 
