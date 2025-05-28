@@ -6,6 +6,8 @@ import { queryParams } from "../../utils/global-type";
 export const inventoryQuery = queryParams.shape({
     condition: yup.string().oneOf(Object.values(InventoryCondition)).optional(),
     category_id: yup.string().optional(),
+    inventory_id: yup.string().optional(),
+    user_id: yup.string().optional()
 });
 
 export const inventoryParams = yup.object({

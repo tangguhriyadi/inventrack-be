@@ -6,6 +6,7 @@ export const insertLog = async (body: {
     user_name: string;
     inventory?: string;
     inventory_id?: string;
+    inventory_name?: string;
     action: ActionLog;
 }) => {
     try {

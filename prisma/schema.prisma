@@ -68,7 +68,9 @@ model User {
   inventoryCategoryDeleted    InventoryCategory[] @relation(name: "InventoryCategoryDeletedBy")
 
   // booking
-  booking   Booking[] 
+  booking           Booking[] @relation(name: "BookingUser")
+  bookingApproved   Booking[] @relation(name: "BookingApprovedBy")
+  bookingRejected   Booking[] @relation(name:"BookingRejectedBy")
 
   @@map("user")
   @@unique([id])
@@ -117,7 +119,9 @@ model Inventory {
   // inventoryItems      InventoryItem[]
 
   // booking
-  bookingInventory    BookingInventory[]
+  // bookingInventory    BookingInventory[]
+
+  booking           Booking[]
 
   @@map("inventory")
   @@unique([id])
@@ -164,36 +168,52 @@ model InventoryCategory {
 model Booking {
   id                  String    @id @default(uuid())
   user_id             String
+  inventory_id        String
   booking_at          DateTime  @default(now())
-  return_at           DateTime?
-  approved_at         DateTime?
   plan_return_at      DateTime
-  rejected_at         DateTime?
+  created_at          DateTime  @default(now()) 
+  is_done             Boolean   @db.Boolean() @default(false)
+  is_approved         Boolean   @db.Boolean() @default(false)
+  is_rejected         Boolean   @db.Boolean() @default(false)
+  is_returned         Boolean   @db.Boolean() @default(false)
   reject_reason       String?
 
-  created_at          DateTime  @default(now()) 
+  approved_at         DateTime?
+  rejected_at         DateTime?
+  returned_at         DateTime?
+
+  approved_by         String?
+  rejected_by         String?
+
+
 
   // user
-  user                User @relation(fields: [user_id], references: [id])
+  user                 User @relation(fields: [user_id], references: [id], name: "BookingUser")
+  approvedby           User? @relation(fields: [approved_by], references: [id], name: "BookingApprovedBy")
+  rejectedby           User? @relation(fields: [rejected_by], references: [id], name: "BookingRejectedBy")
 
-  bookingInventory    BookingInventory[]
+  // bookingInventory    BookingInventory[]
+
+  inventory           Inventory @relation(fields: [inventory_id], references: [id])
 
 
   @@map("booking")
   @@unique([id])
 }
 
-model BookingInventory {
-  booking_id          String
-  inventory_id        String
-  quantity            Int @default(0)
 
-  booking             Booking @relation(fields: [booking_id], references: [id])
-  inventory           Inventory @relation(fields: [inventory_id], references: [id])
 
-  @@map("booking_inventory")
-  @@unique([booking_id, inventory_id])
-}
+// model BookingInventory {
+//   booking_id          String
+//   inventory_id        String
+  // quantity            Int @default(0)
+
+//   booking             Booking @relation(fields: [booking_id], references: [id])
+//   inventory           Inventory @relation(fields: [inventory_id], references: [id])
+
+//   @@map("booking_inventory")
+//   @@unique([booking_id, inventory_id])
+// }
 
 // model BookingItem {
 //   id                       String    @id @default(uuid())

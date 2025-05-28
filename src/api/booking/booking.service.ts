@@ -14,7 +14,7 @@ import { StatusCodes } from "http-status-codes";
 import { success } from "../../response/success";
 import { bookingRepository } from "./booking.repository";
 import { Pagination } from "../../utils/global-type";
-import { ActionLog, InventoryCondition } from "@prisma/client";
+import { ActionLog, Role } from "@prisma/client";
 import { insertLog } from "../../utils/insert-log";
 
 export const bookingService = {
@@ -33,56 +33,36 @@ export const bookingService = {
         if (!inventory.is_available) {
             throw new HttpException("Inventory is not available", 404);
         }
+
         // CHECK STOCK AVAILABILITY
-        if (req.body.quantity > inventory.quantity) {
+        if (inventory.quantity <= 0) {
             throw new HttpException("Insufficient inventory", 400);
         }
 
         // CHECK CURRENT BOOKING
-        const bookingInventory = await prisma.bookingInventory.findMany({
+        const bookings = await prisma.booking.findMany({
             where: {
-                inventory_id: req.body.inventory_id,
-                booking: {
-                    OR: [
-                        {
-                            return_at: null,
-                        },
-                        {
-                            approved_at: null,
-                        },
-                    ],
+                inventory: {
+                    name: {
+                        contains: req.query.keyword ?? "",
+                        mode: "insensitive",
+                    },
                 },
-            },
-            select: {
-                booking: true,
-                booking_id: true,
-                inventory: true,
-                inventory_id: true,
-                quantity: true,
+                inventory_id: req.body.inventory_id,
+                user_id: req.user.id,
+                is_done: false,
             },
         });
-        const filteredBookingInventory = bookingInventory.filter(
-            (item) => !item.booking.rejected_at
-        );
 
-        const currentBookingCount = filteredBookingInventory.reduce(
-            (acc, curr) => acc + curr.quantity,
-            0
-        );
-        const availableQuantity = inventory.quantity - currentBookingCount;
-        if (req.body.quantity > availableQuantity) {
-            throw new HttpException(
-                `The available quantity is ${availableQuantity}`,
-                400
-            );
+        if (bookings.length > 0) {
+            throw new HttpException("You have booked this item", 400);
         }
 
         await bookingRepository.create(
             req.user.id,
-            req.body.inventory_id,
-            req.body.quantity,
             req.body.booking_at,
-            req.body.plan_return_at
+            req.body.plan_return_at,
+            req.body.inventory_id
         );
 
         await insertLog({
@@ -90,6 +70,7 @@ export const bookingService = {
             user_id: req.user.id,
             user_name: req.user.name,
             inventory_id: req.body.inventory_id,
+            inventory_name: inventory.name,
         });
 
         res.status(StatusCodes.OK).json(success("Success", null));
@@ -97,52 +78,23 @@ export const bookingService = {
     findMany: async (req: BookingRequest, res: Response) => {
         req.query = bookingQuery.validateSync(req.query, { abortEarly: false });
 
-        const bookings = await bookingRepository.findMany(
-            req.user.id,
-            req.query
-        );
+        let bookings;
+        let totalCount: number;
 
-        const checkStatus = (
-            return_at: Date | null,
-            approved_at: Date | null
-        ) => {
-            if (!return_at && !approved_at) {
-                return "PENDING";
-            }
+        if (req.user.role === Role.ADMIN) {
+            bookings = await bookingRepository.findMany(req.user.id, req.query);
+            totalCount = await bookingRepository.count(req.query, req.user.id);
+        } else {
+            bookings = await bookingRepository.findManySelf(
+                req.user.id,
+                req.query
+            );
+            totalCount = await bookingRepository.countSelf(
+                req.query,
+                req.user.id
+            );
+        }
 
-            if (approved_at && !return_at) {
-                return "BOOKED";
-            }
-
-            if (approved_at && return_at) {
-                return "RETURNED";
-            }
-        };
-
-        const bookingResponse = bookings.map((booking) => ({
-            id: booking.booking_id,
-            inventory: booking.inventory.name,
-            quantity: booking.quantity,
-            status: checkStatus(
-                booking.booking.return_at,
-                booking.booking.approved_at
-            ),
-            is_overdue: booking.booking.plan_return_at < new Date(),
-            is_returned: !!booking.booking.return_at,
-            return_at: booking.booking.return_at,
-            approved_at: booking.booking.approved_at,
-            booking_at: booking.booking.booking_at,
-            plan_return_at: booking.booking.plan_return_at,
-            rejected_at: booking.booking.rejected_at,
-            is_rejected: !!booking.booking.rejected_at,
-            reject_reason: booking.booking.reject_reason,
-        }));
-
-        // PAGINATION
-        const totalCount = await bookingRepository.count(
-            req.query,
-            req.user.id
-        );
         const totalPage = Math.ceil(totalCount / req.query.limit);
 
         const pagination: Pagination = {
@@ -153,7 +105,7 @@ export const bookingService = {
         };
 
         res.status(StatusCodes.OK).json(
-            success("Success", bookingResponse, pagination)
+            success("Success", bookings, pagination)
         );
     },
     approve: async (req: BookingRequest, res: Response) => {
@@ -164,7 +116,9 @@ export const bookingService = {
         const booking = await prisma.booking.findFirst({
             where: {
                 id: req.params.id,
-                user_id: req.user.id,
+            },
+            include: {
+                inventory: true,
             },
         });
 
@@ -172,8 +126,20 @@ export const bookingService = {
             throw new HttpException("Booking not found", 404);
         }
 
-        if (booking.approved_at) {
+        if (booking.is_done) {
+            throw new HttpException("Booking has already closed", 400);
+        }
+
+        if (booking.is_approved) {
             throw new HttpException("Booking has already approved", 400);
+        }
+
+        if (booking.is_returned) {
+            throw new HttpException("Booking has already returned", 400);
+        }
+
+        if (booking.is_rejected) {
+            throw new HttpException("Booking has already rejected", 400);
         }
 
         await prisma.booking.update({
@@ -181,72 +147,18 @@ export const bookingService = {
                 id: req.params.id,
             },
             data: {
+                is_approved: true,
+                approved_by: req.user.id,
                 approved_at: new Date(),
             },
         });
-
-        const inventory = await inventoryRepository.findById(
-            req.body.inventory_id
-        );
-        if (!inventory) {
-            throw new HttpException("Inventory not found", 404);
-        }
-
-        const bookingInventory = await prisma.bookingInventory.findMany({
-            where: {
-                inventory_id: req.body.inventory_id,
-                booking: {
-                    OR: [
-                        {
-                            return_at: null,
-                        },
-                        {
-                            approved_at: null,
-                        },
-                    ],
-                },
-            },
-            select: {
-                booking: true,
-                booking_id: true,
-                inventory: true,
-                inventory_id: true,
-                quantity: true,
-            },
-        });
-
-        const filteredBookingInventory = bookingInventory.filter(
-            (item) => !item.booking.rejected_at
-        );
-
-        const currentBookingCount = filteredBookingInventory.reduce(
-            (acc, curr) => acc + curr.quantity,
-            0
-        );
-        const availableQuantity = inventory.quantity - currentBookingCount;
-        if (req.body.quantity > availableQuantity) {
-            throw new HttpException(
-                `The available quantity is ${availableQuantity}`,
-                400
-            );
-        }
-
-        if (availableQuantity === req.body.quantity) {
-            await prisma.inventory.update({
-                where: {
-                    id: req.body.inventory_id,
-                },
-                data: {
-                    condition: InventoryCondition.WORN,
-                },
-            });
-        }
 
         await insertLog({
             action: ActionLog.APPROVE,
             user_id: req.user.id,
             user_name: req.user.name,
             inventory_id: req.body.inventory_id,
+            inventory_name: booking.inventory.name,
         });
 
         res.status(StatusCodes.OK).json(success("Success", null));
@@ -261,12 +173,8 @@ export const bookingService = {
                 id: req.params.id,
                 user_id: req.user.id,
             },
-            select: {
-                id: true,
-                bookingInventory: true,
-                approved_at: true,
-                return_at: true,
-                rejected_at: true,
+            include: {
+                inventory: true,
             },
         });
 
@@ -274,16 +182,16 @@ export const bookingService = {
             throw new HttpException("Booking not found", 404);
         }
 
-        if (booking.rejected_at) {
-            throw new HttpException("Booking has been rejected", 400);
+        if (booking.is_done) {
+            throw new HttpException("Booking has already closed", 400);
         }
 
-        if (!booking.approved_at) {
-            throw new HttpException("Booking has not approved yet", 400);
-        }
-
-        if (booking.return_at) {
+        if (booking.is_returned) {
             throw new HttpException("Booking has already returned", 400);
+        }
+
+        if (booking.is_rejected) {
+            throw new HttpException("Booking has already rejected", 400);
         }
 
         await prisma.booking.update({
@@ -291,17 +199,9 @@ export const bookingService = {
                 id: req.params.id,
             },
             data: {
-                return_at: new Date(),
-            },
-        });
-
-        // ASYNC PROCESS
-        await prisma.inventory.update({
-            where: {
-                id: booking.bookingInventory[0].inventory_id,
-            },
-            data: {
-                condition: InventoryCondition.GOOD,
+                is_returned: true,
+                returned_at: new Date(),
+                is_done: true,
             },
         });
 
@@ -310,6 +210,7 @@ export const bookingService = {
             user_id: req.user.id,
             user_name: req.user.name,
             inventory_id: req.body.inventory_id,
+            inventory_name: booking.inventory.name,
         });
 
         res.status(StatusCodes.OK).json(success("Success", null));
@@ -326,12 +227,8 @@ export const bookingService = {
                 id: req.params.id,
                 user_id: req.user.id,
             },
-            select: {
-                id: true,
-                bookingInventory: true,
-                approved_at: true,
-                return_at: true,
-                rejected_at: true,
+            include: {
+                inventory: true,
             },
         });
 
@@ -339,19 +236,20 @@ export const bookingService = {
             throw new HttpException("Booking not found", 404);
         }
 
-        if (booking.rejected_at) {
-            throw new HttpException("Booking has already rejected", 400);
+        if (booking.is_done) {
+            throw new HttpException("Booking has already closed", 400);
         }
 
-        if (booking.approved_at) {
-            throw new HttpException(
-                "You cannot reject an approved booking",
-                400
-            );
+        if (booking.is_approved) {
+            throw new HttpException("Booking has already approved", 400);
         }
 
-        if (booking.return_at) {
+        if (booking.is_returned) {
             throw new HttpException("Booking has already returned", 400);
+        }
+
+        if (booking.is_rejected) {
+            throw new HttpException("Booking has already rejected", 400);
         }
 
         await prisma.booking.update({
@@ -359,18 +257,11 @@ export const bookingService = {
                 id: req.params.id,
             },
             data: {
+                is_rejected: true,
                 rejected_at: new Date(),
+                is_done: true,
                 reject_reason: req.body.reason,
-            },
-        });
-
-        // ASYNC PROCESS
-        await prisma.inventory.update({
-            where: {
-                id: booking.bookingInventory[0].inventory_id,
-            },
-            data: {
-                condition: InventoryCondition.GOOD,
+                rejected_by: req.user.id,
             },
         });
 
@@ -378,7 +269,8 @@ export const bookingService = {
             action: ActionLog.REJECT,
             user_id: req.user.id,
             user_name: req.user.name,
-            inventory_id: booking.bookingInventory[0].inventory_id,
+            inventory_id: booking.inventory_id,
+            inventory_name: booking.inventory.name,
         });
 
         res.status(StatusCodes.OK).json(success("Success", null));

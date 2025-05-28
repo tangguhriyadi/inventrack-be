@@ -12,7 +12,6 @@ export const bookingParams = yup.object({
 
 export const bookingBody = yup.object({
     inventory_id: yup.string().required(),
-    quantity: yup.number().required().min(1),
     booking_at: yup.date().required(),
     plan_return_at: yup.date().required(),
 });
