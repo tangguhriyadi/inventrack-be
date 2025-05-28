@@ -45,7 +45,7 @@ const authMiddlewaare =
             // 5. check role
             if (!roles.includes(user?.role!)) {
                 next(
-                    new HttpException("Unauthorized!", StatusCodes.UNAUTHORIZED)
+                    new HttpException("Unauthorized!", StatusCodes.FORBIDDEN)
                 );
             }
             // 6. to attach the user to the current request object
