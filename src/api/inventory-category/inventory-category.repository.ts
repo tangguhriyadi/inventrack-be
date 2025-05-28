@@ -10,6 +10,18 @@ export const inventoryCategoryRepository = {
                 name: true,
                 created_at: true,
                 updated_at: true,
+                createdBy: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+                updatedBy: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
             },
             where: {
                 is_deleted: false,
