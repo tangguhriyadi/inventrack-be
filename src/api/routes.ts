@@ -5,6 +5,7 @@ import inventoryCategoryRoutes from "./inventory-category/inventory-category.rou
 import inventoryRoutes from "./inventory/inventory.route";
 import bookingRoutes from "./booking/booking.route";
 import dashboardRoutes from "./dashboard/dashboard.route";
+import cronRoutes from "./cron/cron.route";
 
 const ApiRoutes: Router = Router();
 
@@ -14,5 +15,6 @@ ApiRoutes.use("/category", inventoryCategoryRoutes);
 ApiRoutes.use("/inventory", inventoryRoutes);
 ApiRoutes.use("/booking", bookingRoutes);
 ApiRoutes.use("/dashboard", dashboardRoutes);
+ApiRoutes.use("/cron", cronRoutes);
 
 export default ApiRoutes;

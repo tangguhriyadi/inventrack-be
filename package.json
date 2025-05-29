@@ -27,6 +27,7 @@
         "jsonwebtoken": "^9.0.2",
         "minio": "^8.0.1",
         "module-alias": "^2.2.3",
+        "node-cron": "^4.0.7",
         "nodemailer": "^6.9.14",
         "pino-http": "^10.1.0",
         "yup": "^1.6.1"
