@@ -13,7 +13,7 @@ export const cronService = {
                 is_done: false,
                 is_returned: false,
                 is_approved: true,
-                is_notified: false,
+                is_remind: false,
                 plan_return_at: {
                     lt: new Date(),
                 },
@@ -45,7 +45,7 @@ export const cronService = {
                     },
                 },
                 data: {
-                    is_notified: true,
+                    is_remind: true,
                 },
             });
         }

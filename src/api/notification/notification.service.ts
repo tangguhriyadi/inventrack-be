@@ -1,5 +1,5 @@
 import { NotificationRequest } from "./notification.model";
-import { queryParams } from "../../utils/global-type";
+import { queryParams, transformSortOrder } from "../../utils/global-type";
 import { prisma } from "../../plugins/prisma";
 import { StatusCodes } from "http-status-codes";
 import { success } from "../../response/success";
@@ -14,6 +14,11 @@ export const notificationService = {
             where: {
                 user_id: req.user.id,
             },
+            orderBy: [
+                {
+                    created_at: transformSortOrder(req.query.order_by),
+                },
+            ],
             take: req.query.limit,
             skip: (req.query.page - 1) * req.query.limit,
         });
