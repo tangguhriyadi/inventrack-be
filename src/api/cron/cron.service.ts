@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../../plugins/prisma";
-import { BookingStatus } from "@prisma/client";
+import { BookingStatus, InventoryCondition } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { success } from "../../response/success";
 
@@ -57,6 +57,17 @@ export const cronService = {
                     reject_reason: "[AUTOMATIC] Approver does not respond",
                     rejected_at: new Date(),
                     status: BookingStatus.REJECTED,
+                },
+            });
+
+            await prisma.inventory.updateMany({
+                where: {
+                    id: {
+                        in: overdueBookings.map((d) => d.inventory_id),
+                    },
+                },
+                data: {
+                    condition: InventoryCondition.GOOD,
                 },
             });
 
