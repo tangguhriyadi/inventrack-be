@@ -6,9 +6,9 @@ RUN apt-get update
 # Set the working directory
 WORKDIR /app
 
-# ARG DATABASE_URL
+ARG DATABASE_URL
 
-# ENV DATABASE_URL=${DATABASE_URL}
+ENV DATABASE_URL=${DATABASE_URL}
 
 # Copy package.json and package-lock.json if available
 COPY package*.json ./
