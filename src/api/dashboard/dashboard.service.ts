@@ -106,6 +106,13 @@ export const dashboardService = {
                     lt: new Date(), // `lt` means "less than"
                 },
             },
+            include: {
+                inventory: {
+                    include: {
+                        inventoryCategory: true,
+                    },
+                },
+            },
         });
         res.status(StatusCodes.OK).json(success("Success", data));
     },
