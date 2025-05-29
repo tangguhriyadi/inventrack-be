@@ -10,6 +10,7 @@ import { Pagination } from "../../utils/global-type";
 import { StatusCodes } from "http-status-codes";
 import { success } from "../../response/success";
 import { HttpException } from "../../response/exception";
+import { prisma } from "../../plugins/prisma";
 
 export const inventoryService = {
     findMany: async (req: InventoryRequest, res: Response) => {
@@ -55,6 +56,20 @@ export const inventoryService = {
             abortEarly: false,
         });
 
+        const inventory = await prisma.inventory.findFirst({
+            where: {
+                is_deleted: false,
+                name: req.body.name,
+            },
+        });
+
+        if (inventory) {
+            throw new HttpException(
+                `Inventory name '${req.body.name}' is already exist`,
+                StatusCodes.BAD_REQUEST
+            );
+        }
+
         const createInventory = await inventoryRepository.create(
             req.body,
             req.user.id
@@ -78,6 +93,23 @@ export const inventoryService = {
             throw new HttpException(
                 "Inventory not found",
                 StatusCodes.NOT_FOUND
+            );
+        }
+
+        const duplicateInventory = await prisma.inventory.findFirst({
+            where: {
+                name: req.body.name,
+                is_deleted: false,
+                NOT: {
+                    id: req.params.id,
+                },
+            },
+        });
+
+        if (duplicateInventory) {
+            throw new HttpException(
+                `Inventory name '${req.body.name}' is already exist`,
+                StatusCodes.BAD_REQUEST
             );
         }
 

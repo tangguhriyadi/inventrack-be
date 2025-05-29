@@ -21,5 +21,10 @@ dashboardRoutes.get(
     authMiddlewaare([Role.ADMIN]),
     errorHandler(dashboardService.overdue)
 );
+dashboardRoutes.get(
+    "/booked/byStatus",
+    authMiddlewaare([Role.STAFF]),
+    errorHandler(dashboardService.byStatus)
+);
 
 export default dashboardRoutes;

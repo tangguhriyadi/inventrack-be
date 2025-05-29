@@ -17,10 +17,10 @@ export const userQueryParamsSchema = yup.object({
         .number()
         .transform((value) => Number(value))
         .default(10),
-    sort_added: yup
+    order_by: yup
         .string()
-        .oneOf(["latest", "oldest"], "Invalid sort value")
-        .default("latest"),
+        .oneOf(["newest", "oldest"], "Invalid sort value")
+        .default("newest"),
     keyword: yup.string().default(""),
     role: yup.string().oneOf(Object.values(Role)).optional(),
 });
@@ -34,8 +34,7 @@ export const userBodySchema = yup.object({
 export const userCreateBodySchema = userBodySchema.shape({
     email: yup.string().email().required(),
     password: yup.string().required(),
-})
-
+});
 
 export type UserBodySchema = yup.InferType<typeof userBodySchema>;
 export type UserCreateBodySchema = yup.InferType<typeof userCreateBodySchema>;

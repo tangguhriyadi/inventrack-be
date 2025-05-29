@@ -32,7 +32,7 @@ export const inventoryCategoryRepository = {
             },
             orderBy: [
                 {
-                    created_at: transformSortOrder(query.sort_added),
+                    created_at: transformSortOrder(query.order_by),
                 },
             ],
             take: query.limit,

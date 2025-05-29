@@ -1,4 +1,5 @@
 import { prisma } from "../../plugins/prisma";
+import { transformSortOrder } from "../../utils/global-type";
 import {
     UserBodySchema,
     UserCreateBodySchema,
@@ -46,6 +47,11 @@ export const userRepository = {
                 updated_at: true,
             },
             where: whereCondition,
+            orderBy: [
+                {
+                    created_at: transformSortOrder(query.order_by),
+                },
+            ],
             take: query.limit,
             skip: (query.page - 1) * query.limit,
         });

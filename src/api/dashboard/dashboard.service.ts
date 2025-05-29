@@ -59,7 +59,7 @@ export const dashboardService = {
 
         if (req.query.start_date && req.query.end_date) {
             raw = Prisma.sql`
-        SELECT 
+        -- SELECT 
         SELECT 
         ic.name AS category_name,
         COUNT(b.id) AS count
@@ -108,5 +108,45 @@ export const dashboardService = {
             },
         });
         res.status(StatusCodes.OK).json(success("Success", data));
+    },
+    byStatus: async (req: DashboardRequest, res: Response) => {
+        req.query = dashboardQuery.validateSync(req.query, {
+            abortEarly: false,
+        });
+
+        let raw;
+
+        if (req.query.start_date && req.query.end_date) {
+            raw = Prisma.sql`
+        SELECT 
+        status,
+        COUNT(*) AS count
+        FROM booking b
+        where b.user_id = ${req.user.id}
+        AND b.booking_at BETWEEN ${req.query.start_date} AND ${req.query.end_date}
+        GROUP BY status
+      `;
+        } else {
+            raw = Prisma.sql`
+        SELECT 
+        status,
+        COUNT(*) AS count
+        FROM booking b
+        where b.user_id = ${req.user.id}
+        GROUP BY status
+      `;
+        }
+
+        const result = await prisma.$queryRaw<
+            { status: string; count: number }[]
+        >(raw);
+
+        // Convert BigInt to number
+        const parsed = result.map((item) => ({
+            status: item.status,
+            count: Number(item.count),
+        }));
+
+        res.status(StatusCodes.OK).json(success("Success", parsed));
     },
 };

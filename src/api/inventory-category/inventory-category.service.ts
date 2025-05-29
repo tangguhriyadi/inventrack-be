@@ -9,6 +9,7 @@ import { inventoryCategoryRepository } from "./inventory-category.repository";
 import { success } from "../../response/success";
 import { Response } from "express";
 import { HttpException } from "../../response/exception";
+import { prisma } from "../../plugins/prisma";
 
 export const inventoryCategoryService = {
     findMany: async (req: InventoryCategoryRequest, res: Response) => {
@@ -58,6 +59,20 @@ export const inventoryCategoryService = {
             abortEarly: false,
         });
 
+        const category = await prisma.inventoryCategory.findFirst({
+            where: {
+                is_deleted: false,
+                name: req.body.name,
+            },
+        });
+
+        if (category) {
+            throw new HttpException(
+                `Category name '${req.body.name}' is already exist`,
+                StatusCodes.BAD_REQUEST
+            );
+        }
+
         const createCategory = await inventoryCategoryRepository.create(
             req.body,
             req.user.id
@@ -83,6 +98,23 @@ export const inventoryCategoryService = {
             throw new HttpException(
                 "Category not found",
                 StatusCodes.NOT_FOUND
+            );
+        }
+
+        const duplicateCategory = await prisma.inventoryCategory.findFirst({
+            where: {
+                name: req.body.name,
+                is_deleted: false,
+                NOT: {
+                    id: req.params.id,
+                },
+            },
+        });
+
+        if (duplicateCategory) {
+            throw new HttpException(
+                `Category name '${req.body.name}' is already exist`,
+                StatusCodes.BAD_REQUEST
             );
         }
 

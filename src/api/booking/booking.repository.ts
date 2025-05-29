@@ -82,7 +82,7 @@ export const bookingRepository = {
             },
             orderBy: [
                 {
-                    created_at: transformSortOrder(query.sort_added),
+                    created_at: transformSortOrder(query.order_by),
                 },
             ],
             take: query.limit,
@@ -162,7 +162,7 @@ export const bookingRepository = {
             },
             orderBy: [
                 {
-                    created_at: transformSortOrder(query.sort_added),
+                    created_at: transformSortOrder(query.order_by),
                 },
             ],
             take: query.limit,

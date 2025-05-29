@@ -46,7 +46,7 @@ export const inventoryRepository = {
             where: whereCondition,
             orderBy: [
                 {
-                    created_at: transformSortOrder(query.sort_added),
+                    created_at: transformSortOrder(query.order_by),
                 },
             ],
             take: query.limit,
