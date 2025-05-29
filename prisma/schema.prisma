@@ -176,6 +176,7 @@ model Booking {
   is_rejected         Boolean   @db.Boolean() @default(false)
   is_returned         Boolean   @db.Boolean() @default(false)
   reject_reason       String?
+  is_remind         Boolean   @db.Boolean() @default(false)
 
   approved_at         DateTime?
   rejected_at         DateTime?

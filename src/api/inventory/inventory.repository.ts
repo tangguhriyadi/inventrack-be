@@ -61,6 +61,7 @@ export const inventoryRepository = {
             },
             select: {
                 id: true,
+                createdBy: true,
                 name: true,
                 condition: true,
                 image_url: true,

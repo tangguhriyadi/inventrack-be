@@ -67,7 +67,7 @@ export const bookingService = {
             throw new HttpException("You have booked this item", 400);
         }
 
-        await bookingRepository.create(
+        const bookNow = await bookingRepository.create(
             req.user.id,
             req.body.booking_at,
             req.body.plan_return_at,
@@ -80,6 +80,17 @@ export const bookingService = {
             },
             data: {
                 condition: InventoryCondition.WORN,
+            },
+        });
+
+        await prisma.notification.create({
+            data: {
+                action: ActionLog.BOOK,
+                user_id: inventory.createdBy.id,
+                inventory_id: req.body.inventory_id,
+                message: `New book for '${inventory.name}' by ${req.user.name}`,
+                is_read: false,
+                booking_id: bookNow.id,
             },
         });
 
@@ -188,9 +199,9 @@ export const bookingService = {
                 inventory_id: booking.inventory_id,
                 booking_id: booking.id,
                 message: `Your booking for ${booking.inventory.name} has been approved`,
-                is_read:false,
-            }
-        })
+                is_read: false,
+            },
+        });
 
         await insertLog({
             action: ActionLog.APPROVE,
@@ -261,9 +272,9 @@ export const bookingService = {
                 inventory_id: booking.inventory_id,
                 booking_id: booking.id,
                 message: `You inventory '${booking.inventory.name}' has been returned`,
-                is_read:false,
-            }
-        })
+                is_read: false,
+            },
+        });
 
         await insertLog({
             action: ActionLog.RETURN,
@@ -342,9 +353,9 @@ export const bookingService = {
                 inventory_id: booking.inventory_id,
                 booking_id: booking.id,
                 message: `You booking for '${booking.inventory.name}' has been rejected`,
-                is_read:false,
-            }
-        })
+                is_read: false,
+            },
+        });
 
         await insertLog({
             action: ActionLog.REJECT,

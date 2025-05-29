@@ -13,6 +13,7 @@ export const cronService = {
                 is_done: false,
                 is_returned: false,
                 is_approved: true,
+                is_notified: false,
                 plan_return_at: {
                     lt: new Date(),
                 },
@@ -35,6 +36,17 @@ export const cronService = {
                     message: `You booking for '${d.inventory.name}' is overdue ! , please return it ASAP `,
                     is_read: false,
                 })),
+            });
+
+            await prisma.booking.updateMany({
+                where: {
+                    id: {
+                        in: overdueBookings.map((d) => d.id),
+                    },
+                },
+                data: {
+                    is_notified: true,
+                },
             });
         }
         res.status(StatusCodes.OK).json(success("Success", null));
@@ -99,7 +111,7 @@ export const cronService = {
             });
 
             console.log(
-                `[Cron] booking id ${ids.join(
+                `[Cron] booking for ${overdueBookings.map(d => d.inventory.name).join(
                     ","
                 )} has automatically rejected by system.`
             );
