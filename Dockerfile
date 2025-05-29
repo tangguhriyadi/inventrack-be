@@ -1,8 +1,7 @@
 # Stage 1: Build stage
-FROM node:22-alpine AS build
+FROM node:22 AS build
 
-RUN apk add --no-cache openssl
-RUN apk add --no-cache make g++ python3
+RUN apt-get update
 
 # Set the working directory
 WORKDIR /app
