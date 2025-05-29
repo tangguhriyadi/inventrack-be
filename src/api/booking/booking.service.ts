@@ -196,7 +196,7 @@ export const bookingService = {
             action: ActionLog.APPROVE,
             user_id: booking.user_id,
             user_name: req.user.name,
-            inventory_id: req.body.inventory_id,
+            inventory_id: booking.inventory_id,
             inventory_name: booking.inventory.name,
         });
 

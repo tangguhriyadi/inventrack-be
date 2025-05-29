@@ -7,6 +7,7 @@ import bookingRoutes from "./booking/booking.route";
 import dashboardRoutes from "./dashboard/dashboard.route";
 import cronRoutes from "./cron/cron.route";
 import notificationRoutes from "./notification/notification.route";
+import auditTrailsRoute from "./audit-trails/audit-trails.route";
 
 const ApiRoutes: Router = Router();
 
@@ -18,5 +19,6 @@ ApiRoutes.use("/booking", bookingRoutes);
 ApiRoutes.use("/dashboard", dashboardRoutes);
 ApiRoutes.use("/cron", cronRoutes);
 ApiRoutes.use("/notification", notificationRoutes);
+ApiRoutes.use("/audit-trails", auditTrailsRoute);
 
 export default ApiRoutes;

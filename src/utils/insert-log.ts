@@ -14,7 +14,7 @@ export const insertLog = async (body: {
             data: {
                 user_id: body.user_id,
                 user_name: body.user_name,
-                inventory: body.inventory,
+                inventory: body.inventory_name,
                 inventory_id: body.inventory_id,
                 action: body.action,
             },
