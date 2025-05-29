@@ -1,3 +1,4 @@
-import app from "../src/app";
+import { server } from "../src/app";
 
-export default app;
+// For Vercel, we need to export the HTTP server with Socket.IO
+export default server;

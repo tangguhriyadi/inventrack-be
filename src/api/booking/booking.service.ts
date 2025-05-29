@@ -21,6 +21,7 @@ import {
     Role,
 } from "@prisma/client";
 import { insertLog } from "../../utils/insert-log";
+import { NotificationService } from "../../utils/pusher";
 
 export const bookingService = {
     book: async (req: BookingRequest, res: Response) => {
@@ -101,6 +102,12 @@ export const bookingService = {
             inventory_id: req.body.inventory_id,
             inventory_name: inventory.name,
         });
+
+        NotificationService.info(
+            "Booking Received",
+            "You have new booking request",
+            inventory.createdBy.id
+        );
 
         res.status(StatusCodes.OK).json(success("Success", null));
     },
@@ -211,6 +218,12 @@ export const bookingService = {
             inventory_name: booking.inventory.name,
         });
 
+        NotificationService.info(
+            "Booking Approved",
+            "Your booking has been approved",
+            booking.user_id
+        );
+
         res.status(StatusCodes.OK).json(success("Success", null));
     },
     return: async (req: BookingRequest, res: Response) => {
@@ -283,6 +296,12 @@ export const bookingService = {
             inventory_id: req.body.inventory_id,
             inventory_name: booking.inventory.name,
         });
+
+        NotificationService.success(
+            "Inventory Returned",
+            `${booking.inventory.name} is returned`,
+            booking.inventory.created_by
+        );
 
         res.status(StatusCodes.OK).json(success("Success", null));
     },
@@ -364,6 +383,12 @@ export const bookingService = {
             inventory_id: booking.inventory_id,
             inventory_name: booking.inventory.name,
         });
+
+        NotificationService.error(
+            "Booking Rejected",
+            `Your booking for ${booking.inventory.name} has been rejected`,
+            booking.user_id
+        );
 
         res.status(StatusCodes.OK).json(success("Success", null));
     },

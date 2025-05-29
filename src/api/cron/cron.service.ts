@@ -3,6 +3,7 @@ import { prisma } from "../../plugins/prisma";
 import { ActionLog, BookingStatus, InventoryCondition } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { success } from "../../response/success";
+import { NotificationService } from "../../utils/pusher";
 
 export const cronService = {
     overdueBooking: async (req: Request, res: Response) => {
@@ -33,7 +34,7 @@ export const cronService = {
                     user_id: d.user_id,
                     inventory_id: d.inventory_id,
                     booking_id: d.id,
-                    message: `You booking for '${d.inventory.name}' is overdue ! , please return it ASAP `,
+                    message: `Your booking for '${d.inventory.name}' is overdue ! , please return it ASAP `,
                     is_read: false,
                 })),
             });
@@ -47,6 +48,14 @@ export const cronService = {
                 data: {
                     is_remind: true,
                 },
+            });
+
+            overdueBookings.forEach(async (d) => {
+                NotificationService.info(
+                    "Overdue !",
+                    `Your booking for '${d.inventory.name}' is overdue ! , please return it ASAP `,
+                    d.user_id
+                );
             });
         }
         res.status(StatusCodes.OK).json(success("Success", null));
@@ -110,10 +119,18 @@ export const cronService = {
                 })),
             });
 
+            overdueBookings.forEach(async (d) => {
+                NotificationService.info(
+                    "No response from approver",
+                    `Your booking for ${d.inventory.name} has been rejected automatically due to no respond from Admin`,
+                    d.user_id
+                );
+            });
+
             console.log(
-                `[Cron] booking for ${overdueBookings.map(d => d.inventory.name).join(
-                    ","
-                )} has automatically rejected by system.`
+                `[Cron] booking for ${overdueBookings
+                    .map((d) => d.inventory.name)
+                    .join(",")} has automatically rejected by system.`
             );
         }
         res.status(StatusCodes.OK).json(success("Success", null));
