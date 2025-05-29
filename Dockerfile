@@ -1,5 +1,5 @@
 # Stage 1: Build stage
-FROM node:20 AS build
+FROM node:22-alpine AS build
 
 RUN apt-get update
 
