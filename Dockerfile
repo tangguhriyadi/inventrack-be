@@ -1,6 +1,7 @@
 # Stage 1: Build stage
 FROM node:22-alpine AS build
 
+RUN apk add --no-cache openssl
 RUN apk add --no-cache make g++ python3
 
 # Set the working directory
