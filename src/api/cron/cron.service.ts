@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../../plugins/prisma";
-import { BookingStatus, InventoryCondition } from "@prisma/client";
+import { ActionLog, BookingStatus, InventoryCondition } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { success } from "../../response/success";
 
@@ -17,12 +17,25 @@ export const cronService = {
                     lt: new Date(),
                 },
             },
+            include: {
+                inventory: true,
+            },
         });
 
         console.log(`[Cron] Found ${overdueBookings.length} overdue bookings.`);
 
         if (overdueBookings.length > 0) {
             console.log("push notification");
+            await prisma.notification.createMany({
+                data: overdueBookings.map((d) => ({
+                    action: ActionLog.REJECT,
+                    user_id: d.user_id,
+                    inventory_id: d.inventory_id,
+                    booking_id: d.id,
+                    message: `You booking for '${d.inventory.name}' is overdue ! , please return it ASAP `,
+                    is_read: false,
+                })),
+            });
         }
         res.status(StatusCodes.OK).json(success("Success", null));
     },
@@ -38,6 +51,9 @@ export const cronService = {
                 plan_return_at: {
                     lt: new Date(),
                 },
+            },
+            include: {
+                inventory: true,
             },
         });
 
@@ -69,6 +85,17 @@ export const cronService = {
                 data: {
                     condition: InventoryCondition.GOOD,
                 },
+            });
+
+            await prisma.notification.createMany({
+                data: overdueBookings.map((d) => ({
+                    action: ActionLog.REJECT,
+                    user_id: d.user_id,
+                    inventory_id: d.inventory_id,
+                    booking_id: d.id,
+                    message: `Your booking for '${d.inventory.name}' has been rejected automatically due to no respond from Admin`,
+                    is_read: false,
+                })),
             });
 
             console.log(

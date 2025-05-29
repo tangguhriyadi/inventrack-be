@@ -79,6 +79,9 @@ model User {
   bookingApproved   Booking[] @relation(name: "BookingApprovedBy")
   bookingRejected   Booking[] @relation(name:"BookingRejectedBy")
 
+  // notif
+  notification       Notification[]
+
   @@map("user")
   @@unique([id])
 }
@@ -128,25 +131,14 @@ model Inventory {
   // booking
   // bookingInventory    BookingInventory[]
 
+  notification        Notification[]
+
   booking           Booking[]
 
   @@map("inventory")
   @@unique([id])
 }
 
-// model InventoryItem {
-//   id                  String    @id @default(uuid())
-//   inventory_id        String    
-
-//   created_at          DateTime  @default(now())
-//   updated_at          DateTime  @updatedAt
-
-//   //inventory
-//   inventory           Inventory @relation(fields: [inventory_id], references: [id])
-
-//   @@map("inventory_item")
-//   @@unique([id])
-// }
 
 model InventoryCategory {
   id                  String    @id @default(uuid())
@@ -203,32 +195,28 @@ model Booking {
 
   inventory           Inventory @relation(fields: [inventory_id], references: [id])
 
+  notification        Notification[]
+
 
   @@map("booking")
   @@unique([id])
 }
 
 
+model Notification {
+  id                  String    @id @default(uuid())
+  user_id             String
+  booking_id          String
+  inventory_id        String
+  message             String
+  action              ActionLog
+  is_read             Boolean   @db.Boolean() @default(false)
+  created_at          DateTime  @default(now())
 
-// model BookingInventory {
-//   booking_id          String
-//   inventory_id        String
-  // quantity            Int @default(0)
+  user                User    @relation(fields: [user_id], references: [id])
+  booking             Booking @relation(fields: [booking_id], references: [id])
+  inventory           Inventory @relation(fields: [inventory_id], references: [id])
 
-//   booking             Booking @relation(fields: [booking_id], references: [id])
-//   inventory           Inventory @relation(fields: [inventory_id], references: [id])
-
-//   @@map("booking_inventory")
-//   @@unique([booking_id, inventory_id])
-// }
-
-// model BookingItem {
-//   id                       String    @id @default(uuid())
-//   user_id                  String
-//   inventory_id             String
-//   quantity                 Int
-//   created_at               DateTime
-
-//   @@map("booking_item")
-//   @@unique([id])
-// }
+  @@map("notification")
+  @@unique([id])
+}

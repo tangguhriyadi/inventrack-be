@@ -181,9 +181,20 @@ export const bookingService = {
             },
         });
 
+        await prisma.notification.create({
+            data: {
+                action: ActionLog.APPROVE,
+                user_id: booking.user_id,
+                inventory_id: booking.inventory_id,
+                booking_id: booking.id,
+                message: `Your booking for ${booking.inventory.name} has been approved`,
+                is_read:false,
+            }
+        })
+
         await insertLog({
             action: ActionLog.APPROVE,
-            user_id: req.user.id,
+            user_id: booking.user_id,
             user_name: req.user.name,
             inventory_id: req.body.inventory_id,
             inventory_name: booking.inventory.name,
@@ -242,6 +253,17 @@ export const bookingService = {
                 condition: InventoryCondition.GOOD,
             },
         });
+
+        await prisma.notification.create({
+            data: {
+                action: ActionLog.RETURN,
+                user_id: booking.inventory.created_by,
+                inventory_id: booking.inventory_id,
+                booking_id: booking.id,
+                message: `You inventory '${booking.inventory.name}' has been returned`,
+                is_read:false,
+            }
+        })
 
         await insertLog({
             action: ActionLog.RETURN,
@@ -312,6 +334,17 @@ export const bookingService = {
                 condition: InventoryCondition.GOOD,
             },
         });
+
+        await prisma.notification.create({
+            data: {
+                action: ActionLog.REJECT,
+                user_id: booking.user_id,
+                inventory_id: booking.inventory_id,
+                booking_id: booking.id,
+                message: `You booking for '${booking.inventory.name}' has been rejected`,
+                is_read:false,
+            }
+        })
 
         await insertLog({
             action: ActionLog.REJECT,
