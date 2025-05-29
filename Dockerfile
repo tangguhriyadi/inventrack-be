@@ -8,7 +8,7 @@ WORKDIR /app
 
 ARG DATABASE_URL
 
-ENV DATABASE_URL=${DATABASE_URL}
+ENV DATABASE_URL=postgresql://postgres.yqwkcvcutagrzbvtsqye:Stronghold2%40@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
 
 # Copy package.json and package-lock.json if available
 COPY package*.json ./
