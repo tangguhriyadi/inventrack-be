@@ -20,10 +20,10 @@ export const server = createServer(app);
 // Initialize Socket.IO for notifications
 export const io = new Server(server, {
     cors: {
-        origin: "*", // Set your Next.js app URL
+        origin: '*',
         methods: ["GET", "POST"],
+        credentials: true,
     },
-    // Vercel-friendly configuration
     transports: ["polling", "websocket"],
     allowEIO3: true,
 });
@@ -55,9 +55,11 @@ export const sendNotification = (data: any, userId?: string) => {
 
 // middlewares
 app.use(cors({
-    origin: process.env.FRONTEND_URL || '*', // fallback for dev
+    origin: process.env.FRONTEND_URL || '*',
     credentials: true,
-  }));
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(helmet());
 app.use(
     bodyParser.urlencoded({
