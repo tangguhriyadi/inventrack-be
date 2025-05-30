@@ -6,6 +6,17 @@ highly relevant to Elevate360’s future scalability, scheduling, and system eff
 
 ---
 
+# Tech Stack & Libraries
+- Nodejs
+- Expressjs
+- Typescript
+- Prisma
+- Postgre
+- socket.io
+- node-cron
+
+--
+
 ## Prerequisites
 
 - Node.js (v20 or newer recommended)
