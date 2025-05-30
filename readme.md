@@ -15,7 +15,13 @@ highly relevant to Elevate360’s future scalability, scheduling, and system eff
 - socket.io
 - node-cron
 
---
+---
+
+# Admin Credential
+- Email : admin@admin.com
+- Password: Admin123!
+
+---
 
 ## Prerequisites
 
