@@ -134,15 +134,24 @@ export const inventoryRepository = {
             },
         });
     },
-    count: async (keyword?: string) => {
-        return await prisma.inventoryCategory.count({
-            where: {
-                is_deleted: false,
-                name: {
-                    contains: keyword ?? "",
-                    mode: "insensitive",
-                },
+    count: async (query: InventoryQuery) => {
+        const whereCondition = {
+            is_deleted: false,
+            name: {
+                contains: query.keyword,
+                mode: "insensitive",
             },
+        } as any;
+
+        if (query.condition) {
+            whereCondition.condition = query.condition;
+        }
+
+        if (query.category_id) {
+            whereCondition.category_id = query.category_id;
+        }
+        return await prisma.inventory.count({
+            where: whereCondition,
         });
     },
 };

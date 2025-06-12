@@ -21,7 +21,7 @@ export const inventoryService = {
         const inventories = await inventoryRepository.findMany(req.query);
 
         // PAGINATION
-        const totalCount = await inventoryRepository.count(req.query.keyword);
+        const totalCount = await inventoryRepository.count(req.query);
         const totalPage = Math.ceil(totalCount / req.query.limit);
 
         const pagination: Pagination = {
