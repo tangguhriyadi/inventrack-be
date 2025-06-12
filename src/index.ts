@@ -7,7 +7,7 @@ import { ENV } from "./utils/secrets";
 scheduleOverdueBookingChecker();
 scheduleAutomaticReject()
 // start server
-server.listen(ENV.PORT, () => {
+server.listen(ENV.PORT, '0.0.0.0', () => {
     logger.info(
         `Server with Socket.IO notifications running on port ${ENV.PORT}`
     );
